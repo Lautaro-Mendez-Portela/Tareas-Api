@@ -5,7 +5,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://lautaromendezportela_db_user:J4yIVns2UCgHtKIf@cluster0.howmkkw.mongodb.net/?appName=Cluster0').then(() => {
+mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log('Conexión a MongoDB exitosa');
 }).catch((error) => console.log(error));
 
