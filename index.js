@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -20,6 +22,24 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+function auth(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: 'No autorizado' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Token inválido' });
+  }
+}
+
 app.use(express.json());
 
 
@@ -27,7 +47,7 @@ app.get('/', (req, res) => {
   res.send('API funcionando 🚀');
 });
 
-app.get('/tasks', async (req, res) => {
+app.get('/tasks', auth, async (req, res) => {
   try {
     const tasks = await Task.find();
     res.json(tasks);
@@ -36,7 +56,7 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
-app.post('/tasks', async (req, res) => {
+app.post('/tasks', auth, async (req, res) => {
   try {
     const newTask = new Task({
       title: req.body.title,
@@ -89,7 +109,7 @@ app.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id },
-      'secreto',
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
