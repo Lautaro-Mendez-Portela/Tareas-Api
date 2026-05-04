@@ -13,10 +13,12 @@ const taskSchema = new mongoose.Schema({
 
 const Task = mongoose.model('Task', taskSchema);
 
-let tasks = [
-  { id: 1, title: 'Aprender Node', completed: false },
-  { id: 2, title: 'Hacer proyecto', completed: false }
-];
+const userSchema = new mongoose.Schema({
+  email: String,
+  password: String
+});
+
+const User = mongoose.model('User', userSchema);
 
 app.use(express.json());
 
@@ -48,6 +50,56 @@ app.post('/tasks', async (req, res) => {
     res.status(500).json({ message: 'Error al crear tarea' });
   }
 });
+
+const bcrypt = require('bcrypt');
+
+app.post('/register', async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    const user = new User({
+      email: req.body.email,
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    res.json({ message: 'Usuario registrado exitosamente' });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error al registrar usuario' });
+  }
+});
+
+const jwt = require('jsonwebtoken');
+
+app.post('/login', async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+
+    if (!validPassword) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id },
+      'secreto',
+      { expiresIn: '1h' }
+    );
+
+    res.json({ token });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error en login' });
+  }
+});
+
 
 app.delete('/tasks/:id', async (req, res) => {
   try {
