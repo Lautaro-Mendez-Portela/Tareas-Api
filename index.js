@@ -1,5 +1,17 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://lautaromendezportela_db_user:J4yIVns2UCgHtKIf@cluster0.howmkkw.mongodb.net/?appName=Cluster0').then(() => {
+  console.log('Conexión a MongoDB exitosa');
+}).catch((error) => console.log(error));
+
+const taskSchema = new mongoose.Schema({
+  title: String,
+  completed: Boolean
+});
+
+const Task = mongoose.model('Task', taskSchema);
 
 let tasks = [
   { id: 1, title: 'Aprender Node', completed: false },
@@ -13,45 +25,70 @@ app.get('/', (req, res) => {
   res.send('API funcionando 🚀');
 });
 
-app.get('/tasks', (req, res) => {
-  res.json(tasks);
-});
-
-app.post('/tasks', (req, res) => {
-  const newTask = {
-    id: tasks.length + 1,
-    title: req.body.title,
-    completed: false
-  };
-
-  tasks.push(newTask);
-
-  res.json(newTask);
-});
-
-app.delete('/tasks/:id', (req, res) => {
-  const taskId = parseInt(req.params.id);
-
-  const initialLength = tasks.length;
-
-  tasks = tasks.filter(task => task.id !== taskId);
-
-  if (tasks.length === initialLength) {
-    return res.status(404).json({ message: 'Tarea no encontrada' });
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await Task.find();
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener tareas' });
   }
-
-  res.json({ message: 'Tarea eliminada correctamente' });
 });
 
-app.put('/tasks/:id', (req, res) => {
-    const taskId = parseInt(req.params.id);
+app.post('/tasks', async (req, res) => {
+  try {
+    const newTask = new Task({
+      title: req.body.title,
+      completed: false
+    });
 
-    const task = tasks.find(task => task.id === taskId);
-    
-    if (!task) {
-        return res.status(404).json({ message: 'Tarea no encontrada' });
+    const savedTask = await newTask.save();
+
+    res.json(savedTask);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al crear tarea' });
+  }
+});
+
+app.delete('/tasks/:id', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: 'Tarea no encontrada' });
     }
-}); 
+
+    res.json({ message: 'Tarea eliminada correctamente' });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar tarea' });
+  }
+});
+
+app.put('/tasks/:id', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        title: req.body.title,
+        completed: req.body.completed
+      },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: 'Tarea no encontrada' });
+    }
+
+    res.json(updatedTask);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar tarea' });
+  }
+});
 
 
 app.listen(3000, () => {
