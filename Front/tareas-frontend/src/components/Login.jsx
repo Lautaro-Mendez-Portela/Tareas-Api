@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { API_URL } from "../api";
+import toast from "react-hot-toast";
 
 function Login({ setToken, getTasks }) {
   const [email, setEmail] = useState("");
@@ -7,7 +8,7 @@ function Login({ setToken, getTasks }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Por favor completa todos los campos");
+      toast.error("Por favor completa todos los campos");
       return;
     }
     try {
@@ -25,19 +26,20 @@ function Login({ setToken, getTasks }) {
         setToken(data.token);
         localStorage.setItem("token", data.token);
         getTasks(data.token);
+        toast.success("Sesión iniciada correctamente");
       } else {
-        alert("Error en login");
+        toast.error("Error en login");
       }
 
     } catch (error) {
       console.log(error);
-      alert("Error de conexión");
+      toast.error("Error de conexión");
     }
   };
 
   const handleRegister = async () => {
     if (!email || !password) {
-      alert("Por favor completa todos los campos");
+      toast.error("Por favor completa todos los campos");
       return;
     }
     try {
@@ -49,19 +51,18 @@ function Login({ setToken, getTasks }) {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await res.json();
-
-    if (data.token) {
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-      getTasks(data.token);
+    if (res.ok) {
+      toast.success("Usuario registrado correctamente");
+      setEmail("");
+      setPassword("");
     } else {
-      alert(data.message || "Error en registro");
+      const data = await res.json();
+      toast.error(data.message || "Error al registrar usuario");
     }
 
     } catch (error) {
       console.log(error);
-      alert("Error de conexión");
+      toast.error("Error de conexión");
     }
   };
 
