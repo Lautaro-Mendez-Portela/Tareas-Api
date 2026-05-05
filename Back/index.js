@@ -4,6 +4,8 @@ const PORT = process.env.PORT || 3000;
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const cors = require('cors');
+
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log('Conexión a MongoDB exitosa');
@@ -42,6 +44,7 @@ function auth(req, res, next) {
 }
 
 app.use(express.json());
+app.use(cors());
 
 
 app.get('/', (req, res) => {
