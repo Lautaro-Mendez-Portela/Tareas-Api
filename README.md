@@ -1,28 +1,19 @@
-#  API de Tareas
+# Tareas App
 
-API REST desarrollada con Node.js, Express y MongoDB.  
-Incluye autenticación con JWT y operaciones CRUD protegidas.
+App fullstack para gestión de tareas con autenticación.
 
----
-
-## Tecnologías
-
+##  Demo
+https://tareas-lmowmkbey-lautaro-mendez-portelas-projects.vercel.app/
+##  Tecnologías
+- React
 - Node.js
 - Express
 - MongoDB
-- JWT
+- Tailwind
 
----
-
-## Deploy
-
-https://tareas-api-gymi.onrender.com
-
----
-
-## Autenticación
-
-Para acceder a rutas protegidas, enviar el token en headers:
-
-Authorization: Bearer TU_TOKEN
-
+##  Features
+- Login / Register
+- Crear tareas
+- Editar tareas
+- Eliminar tareas
+- Marcar como completadas
