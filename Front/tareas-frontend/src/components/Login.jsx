@@ -6,6 +6,10 @@ function Login({ setToken, getTasks }) {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -30,6 +34,37 @@ function Login({ setToken, getTasks }) {
       alert("Error de conexión");
     }
   };
+
+  const handleRegister = async () => {
+    if (!email || !password) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.token) {
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      getTasks(data.token);
+    } else {
+      alert(data.message || "Error en registro");
+    }
+
+    } catch (error) {
+      console.log(error);
+      alert("Error de conexión");
+    }
+  };
+
 
   return (
     <div>
@@ -57,6 +92,12 @@ function Login({ setToken, getTasks }) {
         onClick={handleLogin}
       >
         Login
+      </button>
+
+      <button
+      className="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition mt-2"
+      onClick={handleRegister}>
+      Registrarse
       </button>
     </div>
   );
