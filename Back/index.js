@@ -171,3 +171,7 @@ app.put('/tasks/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+app.get("/health", (req, res) => {
+  res.send("API funcionando");
+});

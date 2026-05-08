@@ -11,6 +11,10 @@ function Login({ setToken, getTasks }) {
       toast.error("Por favor completa todos los campos");
       return;
     }
+
+    // 👉 loading mientras Render despierta
+    const loadingToast = toast.loading("Iniciando servidor...");
+
     try {
       const res = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -22,10 +26,15 @@ function Login({ setToken, getTasks }) {
 
       const data = await res.json();
 
+      // 👉 cerrar loading
+      toast.dismiss(loadingToast);
+
       if (data.token) {
         setToken(data.token);
         localStorage.setItem("token", data.token);
+
         getTasks(data.token);
+
         toast.success("Sesión iniciada correctamente");
       } else {
         toast.error("Error en login");
@@ -33,7 +42,11 @@ function Login({ setToken, getTasks }) {
 
     } catch (error) {
       console.log(error);
-      toast.error("Error de conexión");
+
+      // 👉 cerrar loading si falla
+      toast.dismiss(loadingToast);
+
+      toast.error("El servidor tardó demasiado");
     }
   };
 
@@ -42,30 +55,38 @@ function Login({ setToken, getTasks }) {
       toast.error("Por favor completa todos los campos");
       return;
     }
+
+    const loadingToast = toast.loading("Registrando usuario...");
+
     try {
       const res = await fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    if (res.ok) {
-      toast.success("Usuario registrado correctamente");
-      setEmail("");
-      setPassword("");
-    } else {
-      const data = await res.json();
-      toast.error(data.message || "Error al registrar usuario");
-    }
+      toast.dismiss(loadingToast);
+
+      if (res.ok) {
+        toast.success("Usuario registrado correctamente");
+
+        setEmail("");
+        setPassword("");
+      } else {
+        const data = await res.json();
+        toast.error(data.message || "Error al registrar usuario");
+      }
 
     } catch (error) {
       console.log(error);
+
+      toast.dismiss(loadingToast);
+
       toast.error("Error de conexión");
     }
   };
-
 
   return (
     <div>
@@ -96,9 +117,10 @@ function Login({ setToken, getTasks }) {
       </button>
 
       <button
-      className="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition mt-2"
-      onClick={handleRegister}>
-      Registrarse
+        className="w-full bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition mt-2"
+        onClick={handleRegister}
+      >
+        Registrarse
       </button>
     </div>
   );

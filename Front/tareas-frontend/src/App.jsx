@@ -17,6 +17,10 @@ function App() {
   </p>
 )}
 
+useEffect(() => {
+  fetch(`${API_URL}/health`);
+}, []);
+
   const getTasks = async (token) => {
   setLoading(true);
   try {
