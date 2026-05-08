@@ -12,8 +12,7 @@ function Login({ setToken, getTasks }) {
       return;
     }
 
-    // 👉 loading mientras Render despierta
-    const loadingToast = toast.loading("Iniciando servidor...");
+    const loadingToast = toast.loading("Esperando servidor...");
 
     try {
       const res = await fetch(`${API_URL}/login`, {
@@ -26,7 +25,6 @@ function Login({ setToken, getTasks }) {
 
       const data = await res.json();
 
-      // 👉 cerrar loading
       toast.dismiss(loadingToast);
 
       if (data.token) {
@@ -43,7 +41,6 @@ function Login({ setToken, getTasks }) {
     } catch (error) {
       console.log(error);
 
-      // 👉 cerrar loading si falla
       toast.dismiss(loadingToast);
 
       toast.error("El servidor tardó demasiado");
